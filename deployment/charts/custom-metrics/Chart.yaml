@@ -1,0 +1,5 @@
+apiVersion: v2
+name: custom-metrics
+description: A helm chart for Custommetricadapter
+type: application
+version: 1.0.0

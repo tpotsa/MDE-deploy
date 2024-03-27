@@ -1,0 +1,14 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "metadata-manager.fullname" . }}-internal
+  namespace: {{ .Values.mde.deployment.namespace }}
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    timeoutSec: 10
+    healthyThreshold: 2
+    unhealthyThreshold: 5
+    port: 8080
+    type: HTTP
+    requestPath: /metadata/actuator/health

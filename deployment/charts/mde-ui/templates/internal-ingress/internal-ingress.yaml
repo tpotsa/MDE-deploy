@@ -1,0 +1,21 @@
+{{- if .Values.internalHttpLoadBalancer.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "app.fullname" . }}-int
+  annotations:
+    kubernetes.io/ingress.class: "gce-internal"
+    {{- if .Values.internalHttpLoadBalancer.staticIP }}
+    kubernetes.io/ingress.regional-static-ip-name: {{ .Values.internalHttpLoadBalancer.staticIP | quote }}
+    {{- end }}
+    {{- if .Values.internalHttpLoadBalancer.certificateName }}
+    kubernetes.io/ingress.allow-http: "false"
+    ingress.gcp.kubernetes.io/pre-shared-cert: {{ .Values.internalHttpLoadBalancer.certificateName | quote }}
+    {{- end }}
+spec:
+  defaultBackend:
+    service:
+      name: {{ include "app.fullname" . }}-int-service
+      port:
+        number: 8090
+{{- end }}

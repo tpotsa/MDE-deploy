@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: ${mde_artifact_registry_url}/${mde_container_registry_project_id}/${mde_container_registry_subpath}/configuration-manager
+  pullPolicy: Always
+  tag: "7a994ee"
+
+imagePullSecrets: [ name: "${mde_image_pull_secret_name}" ]
+
+nodeSelector:
+  ${mde_deployment_node_selector}
+
+serviceAccount:
+  create: true
+
+ingress:
+  enabled: false
+
+securityContext: {
+  runAsNonRoot: true,
+  privileged: false,
+  runAsUser: 1000
+}
+
+service:
+  kind: tcp
+  type: ClusterIP
+  http: 8080
+  grpc: 50051
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: ${replica_count}
+  targetCPUUtilizationPercentage: 55
+  targetMemoryUtilizationPercentage: 70
+
+resources:
+  requests:
+    cpu: 1
+    memory: 2Gi
+
+
+mde:
+  deployment:
+    development: false
+    namespace: ${mde_deployment_namespace}
+    projectId: ${mde_project_id}
+    bqProjectId: ${mde_bigquery_project_id}
+    gsa: configuration-manager
+    cloudSQL: ${mde_project_id}:${mde_region}:${mde_cloudsql_instance}=tcp:5432
+    internalIPName: ${mde_config_manager_internal_ip_name}
+    internalIP: ${mde_config_manager_internal_ip}
+    gateway:
+      internalIPName: ${mde_api_internal_ip_name}
+      externalIPName: ${mde_api_external_ip_name}
+      externalDevelopmentIPName: ${mde_api_external_ip_name}
+      domainName: ${mde_deployment_gateway_domainName}
+    redis:
+      primaryHost: ${mde_deployment_redis_host_primary}
+      secondaryHosts: ${mde_deployment_redis_host_secondary}
+      port: ${mde_deployment_redis_host_port}
+      ssl: false
+      authToken: ~
+
+      # @ToDo
+      # requires redis with ssl configuration and then stored CA into a Kubernetes secret with specific name
+      # plus
+      # authToken: ${mde_deployment_redis_authToken}
+  debugging:
+    tracing:
+      sampling: 0

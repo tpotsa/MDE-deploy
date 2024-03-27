@@ -1,0 +1,16 @@
+{{ if (contains "ingress" .Values.service.kind) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "bigquery-sink.fullname" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+  annotations:
+    kubernetes.io/ingress.regional-static-ip-name: "{{ .Values.mde.deployment.internalIPName }}"
+    kubernetes.io/ingress.class: "gce-internal"
+spec:
+  defaultBackend:
+    service:
+      name: {{ include "bigquery-sink.fullname" . }}
+      port:
+        name: http
+  {{ end }}

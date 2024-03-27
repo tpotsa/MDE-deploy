@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mde-internal
+  namespace: {{ .Values.mde.deployment.namespace }}
+  annotations:
+    kubernetes.io/ingress.regional-static-ip-name: "{{ .Values.mde.deployment.gateway.internalIPName }}"
+    kubernetes.io/ingress.class: "gce-internal"
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: {{ include "configuration-manager.fullname" . }}-internal
+                port:
+                  name: http
+            pathType: ImplementationSpecific
+            path: /configuration/*
+          - backend:
+              service:
+                name: metadata-manager-internal
+                port:
+                  name: http
+            pathType: ImplementationSpecific
+            path: /metadata/*
+          - backend:
+              service:
+                name: fed-api-internal
+                port:
+                  name: http
+            pathType: ImplementationSpecific
+            path: /data/*
+  defaultBackend:
+    service:
+      name: {{ include "configuration-manager.fullname" . }}-internal
+      port:
+        name: http

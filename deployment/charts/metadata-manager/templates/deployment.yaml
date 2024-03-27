@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "metadata-manager.fullname" . }}
+  labels:
+    {{- include "metadata-manager.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "metadata-manager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      namespace: {{ .Values.mde.deployment.namespace }}
+      labels:
+        {{- include "metadata-manager.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+              {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "metadata-manager.serviceAccountName" . }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "metadata-manager.fullname" . }}
+              key: username
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "metadata-manager.fullname" . }}
+              key: password
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "metadata-manager.fullname" . }}
+              key: database
+        - name: PROJECT_ID
+          value: {{ .Values.mde.deployment.projectId }}
+        volumeMounts:
+          - mountPath: /tmp/mde
+            name: scratchpad-volume
+          {{- if .Values.mde.deployment.redis.ssl }}
+          - mountPath: /etc/redis-ca.pem
+            name: redis-ca-pem
+            subPath: redis-ca.pem
+            readOnly: true
+          {{- end }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.http }}
+          protocol: TCP
+        - name: grpc
+          containerPort: {{ .Values.service.grpc }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /metadata/actuator/health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /metadata/actuator/health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      - name: cloud-sql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:latest
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - "/cloud_sql_proxy"
+        - "-ip_address_types=PRIVATE"
+        - "-log_debug_stdout=true"
+        - "-verbose=false"
+        - "-instances={{ .Values.mde.deployment.cloudSQL }}"
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "0.5"
+      volumes:
+      {{- if .Values.mde.deployment.redis.ssl }}
+      - name: redis-ca-pem
+        secret:
+          secretName: redis-ca-pem
+      {{- end }}
+      - name: scratchpad-volume
+        emptyDir:
+          sizeLimit: 10Mi

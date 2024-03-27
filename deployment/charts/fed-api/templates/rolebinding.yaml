@@ -1,0 +1,14 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "fed-api.fullname" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+subjects:
+- kind: ServiceAccount
+  name:  {{ include "fed-api.serviceAccountName" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: {{ include "fed-api.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io

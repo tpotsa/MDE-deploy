@@ -1,0 +1,40 @@
+{{ if (.Values.mde.deployment.development) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mde-development-external
+  namespace: {{ .Values.mde.deployment.namespace }}
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: {{ .Values.mde.deployment.gateway.externalDevelopmentIPName }}
+    kubernetes.io/ingress.class: "gce"
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: {{ include "configuration-manager.fullname" . }}-internal
+                port:
+                  name: http
+            pathType: ImplementationSpecific
+            path: /configuration/*
+          - backend:
+              service:
+                name: metadata-manager-internal
+                port:
+                  name: http
+            pathType: ImplementationSpecific
+            path: /metadata/*
+          - backend:
+              service:
+                name: fed-api-internal
+                port:
+                  name: http
+            pathType: ImplementationSpecific
+            path: /data/*
+  defaultBackend:
+    service:
+      name: {{ include "configuration-manager.fullname" . }}-internal
+      port:
+        name: http
+  {{ end }}

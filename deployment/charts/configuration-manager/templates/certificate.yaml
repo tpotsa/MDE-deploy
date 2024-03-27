@@ -1,0 +1,9 @@
+{{ if (false) }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: mde
+spec:
+  domains:
+  - {{ .Values.mde.deployment.gateway.domainName }}
+  {{ end }}

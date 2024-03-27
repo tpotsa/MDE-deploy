@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "metadata-manager.fullname" . }}-internal
+  namespace: {{ .Values.mde.deployment.namespace }}
+  labels:
+    {{- include "metadata-manager.labels" . | nindent 4 }}
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": { "http": "{{ include "metadata-manager.fullname" . }}-internal"}}'
+    cloud.google.com/app-protocols: '{"http":"HTTP"}'
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.service.http }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "metadata-manager.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: custom-metrics
+  namespace: custom-metrics
+  labels:
+    run: custom-metrics
+    k8s-app: custom-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: custom-metrics
+      k8s-app: custom-metrics
+  template:
+    metadata:
+      labels:
+        run: custom-metrics
+        k8s-app: custom-metrics
+        kubernetes.io/cluster-service: "true"
+    spec:
+      serviceAccountName: custom-metrics
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: custom-metrics
+          command:
+            - /adapter
+            - --use-new-resource-model=true
+            - --fallback-for-container-metrics=true
+            - --cert-dir=/tmp
+          resources:
+            limits:
+              cpu: 250m
+              memory: 200Mi
+            requests:
+              cpu: 250m
+              memory: 200Mi

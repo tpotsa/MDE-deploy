@@ -1,0 +1,57 @@
+replicaCount: 1
+
+image:
+  repository: ${mde_artifact_registry_url}/${mde_container_registry_project_id}/${mde_container_registry_subpath}/pubsub-sink
+  pullPolicy: Always
+  tag: "7a994ee"
+
+imagePullSecrets: [ name: "${mde_image_pull_secret_name}" ]
+
+nodeSelector:
+  ${mde_deployment_node_selector}
+
+serviceAccount:
+  create: true
+
+ingress:
+  enabled: false
+
+securityContext: {
+  runAsNonRoot: true,
+  privileged: false,
+  runAsUser: 1000
+}
+
+service:
+  kind: tcp
+  type: ClusterIP
+  http: 8080
+  grpc: 50051
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: ${replica_count}
+  targetCPUUtilizationPercentage: 40
+  targetMemoryUtilizationPercentage: 70
+
+resources:
+  requests:
+    cpu: 1
+    memory: 2Gi
+
+mde:
+  deployment:
+    namespace: ${mde_namespace}
+    projectId: ${mde_project_id}
+    gsa: pubsub-sink
+    redis:
+      primaryHost: ${mde_deployment_redis_host_primary}
+      secondaryHosts: ${mde_deployment_redis_host_secondary}
+      port: ${mde_deployment_redis_host_port}
+      ssl: false
+      authToken: ~
+
+  debugging:
+    tracing:
+      sampling: 0

@@ -1,0 +1,15 @@
+replicaCount: 1
+
+image:
+  repository: ${custom_metrics_container_url}
+  pullPolicy: ${custom_metrics_container_pullPolicy}
+  tag: ${custom_metrics_container_tag}
+
+gcp:
+  gsaName: custom-metrics
+  projectId: ${mde_project_id}
+
+resources:
+  requests:
+    cpu: 1
+    memory: 1Gi

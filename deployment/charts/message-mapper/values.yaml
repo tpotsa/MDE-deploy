@@ -1,0 +1,64 @@
+replicaCount: 1
+
+image:
+  repository: ${mde_artifact_registry_url}/${mde_container_registry_project_id}/${mde_container_registry_subpath}/message-mapper
+  pullPolicy: Always
+  tag: "7a994ee"
+
+imagePullSecrets: [ name: "${mde_image_pull_secret_name}" ]
+
+nodeSelector:
+ ${mde_deployment_node_selector}
+
+serviceAccount:
+  create: true
+
+ingress:
+  enabled: false
+
+securityContext: {
+  runAsNonRoot: true,
+  privileged: false,
+  runAsUser: 1000
+}
+
+service:
+  kind: tcp
+  type: ClusterIP
+  http: 8080
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: ${replica_count}
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 70
+
+resources:
+  requests:
+    cpu: 1
+    memory: 2Gi
+
+mde:
+  system:
+    mdeWhistlePlugin:
+      enabled: true
+    configurationManager:
+      host: configuration-manager
+      port: 50051
+    metadataManager:
+      host: metadata-manager
+      port: 50051
+  deployment:
+    namespace: mde
+    projectId: ${mde_project_id}
+    gsa: message-mapper
+    redis:
+      primaryHost: ${mde_deployment_redis_host_primary}
+      secondaryHosts: ${mde_deployment_redis_host_secondary}
+      port: ${mde_deployment_redis_host_port}
+      ssl: false
+      authToken: ~
+  debugging:
+    tracing:
+      sampling: 0

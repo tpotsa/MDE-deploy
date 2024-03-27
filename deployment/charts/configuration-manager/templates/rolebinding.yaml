@@ -1,0 +1,14 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "configuration-manager.fullname" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+subjects:
+- kind: ServiceAccount
+  name:  {{ include "configuration-manager.serviceAccountName" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: {{ include "configuration-manager.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io

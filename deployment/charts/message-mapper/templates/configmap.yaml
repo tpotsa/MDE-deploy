@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "message-mapper.fullname" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+data:
+  application.yaml: |
+    spring:
+        sleuth:
+          sampler:
+            probability: {{ .Values.mde.debugging.tracing.sampling }}
+    mde:
+      system:
+        project-id: {{ .Values.mde.deployment.projectId }}
+        mdeWhistlePlugin:
+          enabled: {{ .Values.mde.system.mdeWhistlePlugin.enabled }}
+        configurationManager:
+          host: {{ .Values.mde.system.configurationManager.host }}
+          port: {{ .Values.mde.system.configurationManager.port }}
+        metadataManager:
+          host: {{ .Values.mde.system.metadataManager.host }}
+          port: {{ .Values.mde.system.metadataManager.port }}
+        cache:
+          redis:
+            primary-host: {{ .Values.mde.deployment.redis.primaryHost }}
+            replica-hosts: {{ .Values.mde.deployment.redis.secondaryHosts }}
+            port: {{ .Values.mde.deployment.redis.port }}
+            ssl: {{ .Values.mde.deployment.redis.ssl }}
+            auth: {{ .Values.mde.deployment.redis.authToken }}

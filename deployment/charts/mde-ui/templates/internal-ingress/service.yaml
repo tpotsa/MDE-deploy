@@ -1,0 +1,19 @@
+{{- if .Values.internalHttpLoadBalancer.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.fullname" . }}-int-service
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  ports:
+  - name: http
+    port: 8090
+    protocol: TCP
+    targetPort: 80
+  selector:
+    {{- include "app.selectorLabels" . | nindent 4 }}
+  type: ClusterIP
+{{- end }}

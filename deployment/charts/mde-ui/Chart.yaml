@@ -1,0 +1,5 @@
+apiVersion: v2
+name: mde-ui
+description: A helm chart for MDE UI
+type: application
+version: 1.0.0

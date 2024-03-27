@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bigquery-sink.fullname" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+data:
+  application.yaml: |
+    spring:
+        sleuth:
+          sampler:
+            probability: {{ .Values.mde.debugging.tracing.sampling }}
+    mde:
+      system:
+        project-id: {{ .Values.mde.deployment.projectId }}
+        cache:
+          redis:
+            primary-host: {{ .Values.mde.deployment.redis.primaryHost }}
+            replica-hosts: {{ .Values.mde.deployment.redis.secondaryHost }}
+            port: {{ .Values.mde.deployment.redis.port }}
+            ssl: {{ .Values.mde.deployment.redis.ssl }}
+            auth: {{ .Values.mde.deployment.redis.authToken }}

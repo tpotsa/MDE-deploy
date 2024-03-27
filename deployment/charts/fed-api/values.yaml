@@ -1,0 +1,85 @@
+replicaCount: 1
+
+image:
+  repository: ${mde_artifact_registry_url}/${mde_container_registry_project_id}/${mde_container_registry_subpath}/fed-api
+  pullPolicy: Always
+  tag: "7a994ee"
+
+imagePullSecrets: [ name: "${mde_image_pull_secret_name}" ]
+
+serviceAccount:
+  create: true
+
+ingress:
+  enabled: false
+
+securityContext: {
+  runAsNonRoot: true,
+  privileged: false,
+  runAsUser: 1000
+}
+
+service:
+  kind: tcp
+  type: ClusterIP
+  http: 8080
+  grpc: 50051
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
+
+resources:
+  requests:
+    cpu: 2
+    memory: 4Gi
+
+
+mde:
+  deployment:
+    development: false
+    namespace: ${mde_deployment_namespace}
+    projectId: ${mde_project_id}
+    bqProjectId: ${mde_bigquery_project_id}
+    gsa: fed-api
+    internalIP: ${mde_static_ip}
+    internalIPName: ${mde_static_name}
+    externalIP: ${mde_external_static_ip}
+    bqDatasetIdData: mde_data
+    bqDatasetIdSystem: mde_system
+    bqDatasetIdDimension: mde_dimension
+    btProjectId: ${mde_bigtable_project_id}
+    btInstanceId: ${mde_bigtable_name}
+    btRetentiontimeInDays: 40
+    btUseClientsideMetrics: true
+    configManager:
+      port: 50051
+      host: configuration-manager
+    metadataManager:
+      port: 50051
+      host: metadata-manager
+  system:
+    projectid: ${mde_project_id}
+    project-id: ${mde_project_id}
+    configManager:
+      port: 50051
+      host: configuration-manager
+    metadataManager:
+      port: 50051
+      host: metadata-manager
+  gcp:
+    bigquery:
+      projectid: ${mde_project_id}
+      datasetiddata: mde_data
+      datasetidsystem: mde_system
+      datasetiddimension: mde_dimension
+    bigtable:
+      projectid: ${mde_project_id}
+      instanceid: ${mde_bigtable_name}
+      manageretentionpolicy: true
+      retentiontimeindays: 40
+      useclientsidemetrics: true
+

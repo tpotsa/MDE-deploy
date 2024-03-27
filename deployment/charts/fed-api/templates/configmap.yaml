@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fed-api.fullname" . }}
+  namespace: {{ .Values.mde.deployment.namespace }}
+data:
+  application.yaml: |
+    mde:
+      system:
+        project-id: {{ .Values.mde.deployment.projectId }}
+        configmanager: 
+          port: {{ .Values.mde.deployment.configManager.port }}
+          host: {{ .Values.mde.deployment.configManager.host }}
+        metadatamanager: 
+          port: {{ .Values.mde.deployment.metadataManager.port }}
+          host: {{ .Values.mde.deployment.metadataManager.host }}
+    gcp:
+      bigquery:
+        projectid: {{ .Values.mde.deployment.bqProjectId }}
+        datasetiddata: {{ .Values.mde.deployment.bqDatasetIdData }}
+        datasetidsystem: {{ .Values.mde.deployment.bqDatasetIdSystem }}
+        datasetiddimension: {{ .Values.mde.deployment.bqDatasetIdDimension }}
+      bigtable:
+        projectid: {{ .Values.mde.deployment.btProjectId }}
+        instanceid: {{ .Values.mde.deployment.btInstanceId }}
+        retentiontimeindays: {{ .Values.mde.deployment.btRetentiontimeInDays }}
+        useclientsidemetrics: {{ .Values.mde.deployment.btUseClientsideMetrics }}

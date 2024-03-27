@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: ${mde_artifact_registry_url}/${mde_container_registry_project_id}/${mde_container_registry_subpath}/mde-ui
+  pullPolicy: IfNotPresent
+  tag: ${mde_deployment_mdeui_container_tag}
+
+resources:
+  requests:
+    cpu: 1
+    memory: 1Gi
+
+configServerUrl: http://${mde_deployment_mdeui_config_server_host}:${mde_deployment_mdeui_config_server_port}
+imagePullSecrets: [ name: "${mde_image_pull_secret_name}" ]
+
+externalHttpLoadBalancer:
+  enabled: ${mde_deployment_mdeui_ext_http_lb_enabled}
+  staticIP: ${mde_deployment_mdeui_ext_http_lb_static_ip}
+  domain: ${mde_deployment_mdeui_ext_http_lb_domain}
+
+internalHttpLoadBalancer:
+  enabled: ${mde_deployment_mdeui_int_http_lb_enabled}
+  staticIP: ${mde_deployment_mdeui_int_http_lb_static_ip}
+  certificateName: ${mde_deployment_mdeui_int_http_lb_cert_name}
+
+
+  
